@@ -277,7 +277,8 @@ namespace scc {
 			writeGraphFile<FormatSimple::Writer>(filename, data);
 			return;
 		case FMI:
-			break;
+			writeGraphFile<FormatFMI::Writer>(filename, data);
+			return;
 		case FMI_DIST:
 			break;
 		case FMI_CH:

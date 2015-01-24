@@ -62,10 +62,8 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 	Print("Found the following SCCs:");
 	Print("=========================");
 	for (uint i(0); i<scc_vec.size(); i++) {
-		Scc const& scc(scc_vec[i]);
-		uint nr_of_nodes(scc.nodes.size());
-		uint nr_of_edges(scc.edges.size());
-		Print("Component " << i+1 << ": #nodes: " << nr_of_nodes << ", #edges: " << nr_of_edges);
+		Print("Component " << i+1 << ": #nodes: " << scc_vec[i].nodes.size()
+				<<", #edges: " << scc_vec[i].edges.size());
 	}
 }
 
