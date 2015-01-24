@@ -37,7 +37,6 @@ class SccExtractor
 		void dfsFirstPass(std::vector<NodeID>& S);
 		void dfsSecondPass(std::vector<NodeID>& S);
 
-		NodeID getFirstUnseen(std::vector<bool> seen);
 		void pushUnseenAdjacentNodes(NodeID node, std::vector<NodeID>& dfs_stack,
 				std::vector<bool>& seen, EdgeType type);
 
@@ -55,6 +54,7 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 
 	Print("Starting the computation of the SCCs.");
 	std::vector<NodeID> S;
+	S.reserve(g.getNrOfNodes());
 
 #ifndef NVERBOSE
 	TrackTime tt(std::cout);
@@ -87,9 +87,12 @@ void SccExtractor<NodeT, EdgeT>::dfsFirstPass(std::vector<NodeID>& S)
 	std::vector<NodeID> dfs_stack;
 	std::vector<bool> seen(g.getNrOfNodes(), false);
 	std::vector<bool> expanded(g.getNrOfNodes(), false);
+	NodeID start_node(0);
 
 	while (S.size() != g.getNrOfNodes()) {
-		NodeID start_node(getFirstUnseen(seen));
+		while (seen[start_node]) { start_node++; }
+		assert(start_node < g.getNrOfNodes());
+
 		dfs_stack.push_back(start_node);
 		seen[start_node] = true;
 
@@ -106,18 +109,6 @@ void SccExtractor<NodeT, EdgeT>::dfsFirstPass(std::vector<NodeID>& S)
 			}
 		}
 	}
-}
-
-template <typename NodeT, typename EdgeT>
-NodeID SccExtractor<NodeT, EdgeT>::getFirstUnseen(std::vector<bool> seen)
-{
-	NodeID i(0);
-	while (seen[i]) { // assumes that there's at least one unseen
-		i++;
-	}
-
-	assert(i < g.getNrOfNodes());
-	return i;
 }
 
 template <typename NodeT, typename EdgeT>
