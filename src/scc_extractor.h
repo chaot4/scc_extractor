@@ -2,6 +2,7 @@
 #define _SCC_EXTRACTOR
 
 #include "graph.h"
+#include "track_time.h"
 
 #include <vector>
 #include <algorithm>
@@ -54,12 +55,25 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 
 	Print("Starting the computation of the SCCs.");
 	std::vector<NodeID> S;
-	dfsFirstPass(S);
-	dfsSecondPass(S);
-	addEdgesToSccs();
-	resetNodeIDsInSccs();
 
-	Print("Found the following SCCs:");
+#ifndef NVERBOSE
+	TrackTime tt(std::cout);
+#else
+	TrackTime tt;
+#endif
+
+	dfsFirstPass(S);
+	tt.track("first pass of dfs", false);
+	dfsSecondPass(S);
+	tt.track("second pass of dfs", false);
+	addEdgesToSccs();
+	tt.track("edges post processing", false);
+	resetNodeIDsInSccs();
+	tt.track("node id reset", false);
+
+	tt.summary();
+
+	Print("\nFound the following SCCs:");
 	Print("=========================");
 	for (uint i(0); i<scc_vec.size(); i++) {
 		Print("Component " << i+1 << ": #nodes: " << scc_vec[i].nodes.size()
