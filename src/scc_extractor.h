@@ -52,6 +52,7 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 		return;
 	}
 
+	Print("Starting the computation of the SCCs.");
 	std::vector<NodeID> S;
 	dfsFirstPass(S);
 	dfsSecondPass(S);
