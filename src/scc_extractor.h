@@ -73,8 +73,8 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 
 	tt.summary();
 
-	Print("\nFound the following SCCs:");
-	Print("=========================");
+	Print("\nFound " << scc_vec.size() << " SCC(s):");
+	Print("====================");
 	for (uint i(0); i<scc_vec.size(); i++) {
 		Print("Component " << i+1 << ": #nodes: " << scc_vec[i].nodes.size()
 				<<", #edges: " << scc_vec[i].edges.size());
@@ -178,10 +178,11 @@ void SccExtractor<NodeT, EdgeT>::addEdgesToSccs()
 template <typename NodeT, typename EdgeT>
 void SccExtractor<NodeT, EdgeT>::resetNodeIDsInSccs()
 {
+	std::vector<NodeID> new_id(g.getNrOfNodes(), c::NO_NID); // assumes every node is only in one scc
+
 	for (Scc& scc: scc_vec) {
 		std::sort(scc.nodes.begin(), scc.nodes.end());
 
-		std::vector<NodeID> new_id(g.getNrOfNodes(), c::NO_NID);
 		for (uint i(0); i<scc.nodes.size(); i++) {
 			NodeT& node(scc.nodes[i]);
 			new_id[node.id] = i;
