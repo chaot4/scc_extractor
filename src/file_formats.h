@@ -218,6 +218,9 @@ namespace scc {
 	inline void writeCHGraphFile(std::string const& filename, GraphCHOutData<NodeT, EdgeT> const& data)
 	{
 		std::ofstream os(filename.c_str());
+		os.precision(7);
+		os << std::fixed;
+
 		if (!os.is_open()) {
 			std::cerr << "FATAL_ERROR: Couldn't open graph file \'" <<
 				filename << "\'. Exiting." << std::endl;
@@ -255,6 +258,9 @@ namespace scc {
 	inline void writeGraphFile(std::string const& filename, GraphOutData<NodeT, EdgeT> const& data)
 	{
 		std::ofstream os(filename.c_str());
+		os.precision(7);
+		os << std::fixed;
+
 		if (!os.is_open()) {
 			std::cerr << "FATAL_ERROR: Couldn't open graph file \'" <<
 				filename << "\'. Exiting." << std::endl;
