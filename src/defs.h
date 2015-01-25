@@ -25,7 +25,7 @@
 # define debug_assert(...) CHC_NOP
 #else
 # include <cassert>
-# define debug_assert() assert(__VA_ARGS__)
+# define debug_assert(...) assert(__VA_ARGS__)
 #endif
 
 namespace scc
