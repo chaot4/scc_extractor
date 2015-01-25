@@ -52,13 +52,13 @@ add_executable(scc_extractor
 	$<TARGET_OBJECTS:common>
 )
 
-#add_executable(run_tests
-#	src/run_tests.cpp
-#	src/unit_tests.cpp
-#	$<TARGET_OBJECTS:common>
-#)
-#
-#add_test(NAME unit-test
-#	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src"
-#	COMMAND $<TARGET_FILE:run_tests>
-#)
+add_executable(run_tests
+	src/run_tests.cpp
+	src/unit_tests.cpp
+	$<TARGET_OBJECTS:common>
+)
+
+add_test(NAME unit-test
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/src"
+	COMMAND $<TARGET_FILE:run_tests>
+)

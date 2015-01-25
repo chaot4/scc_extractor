@@ -16,6 +16,11 @@
 namespace scc
 {
 
+namespace unit_tests
+{
+	    void testGraph();
+}
+
 template <typename NodeT, typename EdgeT>
 class Graph
 {
@@ -67,6 +72,8 @@ class Graph
 
 		typedef range<typename std::vector<EdgeT>::const_iterator> node_edges_range;
 		node_edges_range nodeEdges(NodeID node_id, EdgeType type) const;
+
+		friend void unit_tests::testGraph();
 };
 
 /*

@@ -13,6 +13,11 @@
 namespace scc
 {
 
+namespace unit_tests
+{
+	    void testNodesAndEdges();
+}
+
 typedef uint NodeID;
 typedef uint EdgeID;
 namespace c
