@@ -162,7 +162,7 @@ void unit_tests::testSccExtractor()
 				for (auto const& edge: g.nodeEdges(current_node, EdgeType(dir))) {
 
 					NodeID other_node(otherNode(edge,EdgeType(dir)));
-					if (!found[dir][other_node] == i) {
+					if (found[dir][other_node] != i) {
 						dfs_stack.push_back(other_node);
 						found[dir][other_node] = i;
 					}
