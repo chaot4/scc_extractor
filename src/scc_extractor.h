@@ -42,8 +42,8 @@ class SccExtractor
 		void dfsFirstPass(std::vector<NodeID>& S);
 		void dfsSecondPass(std::vector<NodeID>& S);
 
-		void pushUnseenAdjacentNodes(NodeID node, std::vector<NodeID>& dfs_stack,
-				std::vector<bool>& seen, EdgeType type);
+		void pushUnexpandedAdjacentNodes(NodeID node, std::vector<NodeID>& dfs_stack,
+				std::vector<bool>& expanded, EdgeType type);
 
 		void addEdgesToSccs();
 		void resetNodeIDsInSccs();
@@ -92,26 +92,27 @@ template <typename NodeT, typename EdgeT>
 void SccExtractor<NodeT, EdgeT>::dfsFirstPass(std::vector<NodeID>& S)
 {
 	std::vector<NodeID> dfs_stack;
-	std::vector<bool> seen(g.getNrOfNodes(), false);
+	std::vector<bool> settled(g.getNrOfNodes(), false);
 	std::vector<bool> expanded(g.getNrOfNodes(), false);
 	NodeID start_node(0);
 
 	while (S.size() != g.getNrOfNodes()) {
-		while (seen[start_node]) { start_node++; }
-		assert(start_node < g.getNrOfNodes());
-
+		while (settled[start_node]) { start_node++; }
 		dfs_stack.push_back(start_node);
-		seen[start_node] = true;
+		assert(start_node < g.getNrOfNodes());
 
 		while (!dfs_stack.empty()) {
 			NodeID current_node(dfs_stack.back());
 
 			if (expanded[current_node]) {
+				if (!settled[current_node]) {
+					S.push_back(current_node);
+					settled[current_node] = true;
+				}
 				dfs_stack.pop_back();
-				S.push_back(current_node);
 			}
 			else {
-				pushUnseenAdjacentNodes(current_node, dfs_stack, seen, OUT);
+				pushUnexpandedAdjacentNodes(current_node, dfs_stack, expanded, OUT);
 				expanded[current_node] = true;
 			}
 		}
@@ -119,14 +120,13 @@ void SccExtractor<NodeT, EdgeT>::dfsFirstPass(std::vector<NodeID>& S)
 }
 
 template <typename NodeT, typename EdgeT>
-void SccExtractor<NodeT, EdgeT>::pushUnseenAdjacentNodes(NodeID node, std::vector<NodeID>& dfs_stack,
-		std::vector<bool>& seen, EdgeType type)
+void SccExtractor<NodeT, EdgeT>::pushUnexpandedAdjacentNodes(NodeID node, std::vector<NodeID>& dfs_stack,
+		std::vector<bool>& expanded, EdgeType type)
 {
 	for (EdgeT const& edge: g.nodeEdges(node, type)) {
 		NodeID other(otherNode(edge, type));
-		if (!seen[other]) {
+		if (!expanded[other]) {
 			dfs_stack.push_back(other);
-			seen[other] = true;
 		}
 	}
 }
@@ -135,12 +135,11 @@ template <typename NodeT, typename EdgeT>
 void SccExtractor<NodeT, EdgeT>::dfsSecondPass(std::vector<NodeID>& S)
 {
 	std::vector<NodeID> dfs_stack;
-	std::vector<bool> seen(g.getNrOfNodes(), false);
+	std::vector<bool> expanded(g.getNrOfNodes(), false);
 
 	while (!S.empty()) {
 		NodeID start_node(S.back());
 		dfs_stack.push_back(start_node);
-		seen[start_node] = true;
 
 		/* create new scc */
 		scc_vec.push_back(Scc());
@@ -150,13 +149,15 @@ void SccExtractor<NodeT, EdgeT>::dfsSecondPass(std::vector<NodeID>& S)
 			NodeID current_node(dfs_stack.back());
 			dfs_stack.pop_back();
 
-			scc_vec.back().nodes.push_back(g.getNode(current_node));
-
-			pushUnseenAdjacentNodes(current_node, dfs_stack, seen, IN);
+			if (!expanded[current_node]) {
+				scc_vec.back().nodes.push_back(g.getNode(current_node));
+				pushUnexpandedAdjacentNodes(current_node, dfs_stack, expanded, IN);
+				expanded[current_node] = true;
+			}
 		}
 
 		/* clean stack */
-		while (!S.empty() && seen[S.back()]) {
+		while (!S.empty() && expanded[S.back()]) {
 			S.pop_back();
 		}
 	}
