@@ -9,6 +9,7 @@
 #include "graph.h"
 #include "file_formats.h"
 #include "dijkstra.h"
+#include "scc_extractor.h"
 
 namespace scc
 {
@@ -18,6 +19,7 @@ void unit_tests::testAll()
 	unit_tests::testNodesAndEdges();
 	unit_tests::testGraph();
 	unit_tests::testDijkstra();
+	unit_tests::testSccExtractor();
 }
 
 void unit_tests::testNodesAndEdges()
@@ -111,6 +113,86 @@ void unit_tests::testDijkstra()
 	Print("\n=================================");
 	Print("TEST: Dijkstra test successful.");
 	Print("=================================\n");
+}
+
+void unit_tests::testSccExtractor()
+{
+	Print("\n==============================");
+	Print("TEST: Start SccExtractor test.");
+	Print("==============================\n");
+
+	Graph<OSMNode, OSMEdge> g;
+	g.init(readGraph<OSMNode, OSMEdge>(FMI_DIST, "../test_data/15kSZHK_fmi.txt"));
+
+	/* Manually constrcut sccs */
+
+	/* NOTE: normally computeSccs() should be used but it's not suited
+	 * for testing purposes. When computeSccs() is changed also this
+	 * test should be adapted! */
+	SccExtractor<OSMNode, OSMEdge> scc_extractor(g);
+
+	std::vector<NodeID> S;
+	S.reserve(g.getNrOfNodes());
+
+	scc_extractor.dfsFirstPass(S);
+	scc_extractor.dfsSecondPass(S);
+	scc_extractor.addEdgesToSccs();
+
+	/* Now test if they really are sccs */
+	auto const& scc_vec(scc_extractor.scc_vec);
+	std::vector<uint> comp_num(g.getNrOfNodes());
+
+	for (uint i(0); i<scc_vec.size(); i++) {
+		for (auto const& node: scc_vec[i].nodes) {
+			comp_num[node.id] = i;
+		}
+	}
+
+	/* 1) test if single components are strongly connected */
+	std::vector<bool> found(g.getNrOfNodes(), false);
+	for (uint i(0); i<scc_vec.size(); i++) {
+		NodeID start_node(scc_vec[i].nodes[0].id);
+		std::vector<NodeID> dfs_stack = { start_node };
+		found[start_node] = true;
+		uint found_nodes_count(1);
+
+		while (!dfs_stack.empty()) {
+			NodeID current_node(dfs_stack.back());
+			dfs_stack.pop_back();
+
+			for (auto const& edge: g.nodeEdges(current_node, OUT)) {
+				NodeID tgt(edge.tgt);
+				if (comp_num[tgt] == i && !found[tgt]) {
+					dfs_stack.push_back(tgt);
+					found[tgt] = true;
+					found_nodes_count++;
+				}
+			}
+		}
+
+		Test(found_nodes_count == scc_vec[i].nodes.size());
+	}
+
+	/* 2) test if components are pairwise not strongly connected */
+	Dijkstra<OSMNode, OSMEdge> dij(g);
+	std::vector<EdgeID> path;
+
+	for (uint i(0); i<scc_vec.size(); i++) {
+		for (uint j(i+1); j<scc_vec.size(); j++) {
+			NodeID node1(scc_vec[i].nodes[0].id);
+			NodeID node2(scc_vec[j].nodes[0].id);
+			Test(dij.calcShopa(node1, node2, path) == c::NO_DIST
+					|| dij.calcShopa(node2, node1, path) == c::NO_DIST);
+		}
+	}
+
+	scc_extractor.resetNodeIDsInSccs();
+	writeGraphFile(FMI, "../test_data/15kSZHK_fmi_szhk.txt", scc_extractor.getGraphDataOfLargestScc());
+
+	Print("\n===================================");
+	Print("TEST: SccExtractor test successful.");
+	Print("===================================\n");
+
 }
 
 }

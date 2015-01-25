@@ -10,6 +10,11 @@
 namespace scc
 {
 
+namespace unit_tests
+{
+	void testSccExtractor();
+}
+
 template <typename NodeT, typename EdgeT>
 class SccExtractor
 {
@@ -42,6 +47,8 @@ class SccExtractor
 
 		void addEdgesToSccs();
 		void resetNodeIDsInSccs();
+
+		friend void unit_tests::testSccExtractor();
 };
 
 template <typename NodeT, typename EdgeT>
@@ -76,7 +83,7 @@ void SccExtractor<NodeT, EdgeT>::computeSccs()
 	Print("\nFound " << scc_vec.size() << " SCC(s):");
 	Print("====================");
 	for (uint i(0); i<scc_vec.size(); i++) {
-		Print("Component " << i+1 << ": #nodes: " << scc_vec[i].nodes.size()
+		Print("Component " << i << ": #nodes: " << scc_vec[i].nodes.size()
 				<<", #edges: " << scc_vec[i].edges.size());
 	}
 }
