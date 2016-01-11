@@ -1,0 +1,7 @@
+This is a small project for extracting strongly connected components from graph data.
+
+Build the project by executing:
+
+./create-build.sh
+
+In case of bugs/questions/comments drop me a mail or file an issue.
